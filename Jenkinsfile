@@ -8,7 +8,7 @@ pipeline {
     stages {
         stage('SCM') {
             steps {
-                git 'https://github.com/vimallinuxworld13/jenkins-docker-maven-java-webapp.git'
+                git 'https://github.com/mdhack0316/jenkinsdockerapp.git'
                 
             }
             
@@ -24,7 +24,7 @@ pipeline {
         
         stage('Build Docker OWN image') {
             steps {
-                sh "sudo docker build -t  vimal13/javaweb:${BUILD_TAG}  ."
+                sh "sudo docker build -t  mdhack0316/javaweb:${BUILD_TAG}  ."
                 //sh 'whoami'
             }
             
@@ -143,7 +143,7 @@ pipeline {
          }
          failure {
              echo "OMG ! The build failed"
-             mail bcc: '', body: 'hi check this ..', cc: '', from: '', replyTo: '', subject: 'job ete fail', to: 'vdaga@lwindia.com'
+             mail bcc: '', body: 'hi check this ..', cc: '', from: '', replyTo: '', subject: 'job ete fail', to: 'mayank123modi@gmail.com'
          }
      }
 
