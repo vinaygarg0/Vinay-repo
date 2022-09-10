@@ -1,90 +1,68 @@
 pipeline {
-    agent any 
+    agent any
+
     stages {
-        stage('gitcode Download') {
+        stage('Pulling The Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/mdhack0316/jenkinsdockerapp'
             }
         }
-        stage('Build Using Maven') {
+        stage('Build Jar File Using Maven Tool') {
             steps {
                 sh 'mvn clean package'
-            }    
-        }
-        stage('Building Own DockerImage') {
-            steps {
-                sh 'docker build -t mdhack/myjava:${BUILD_NUMBER} . '
             }
         }
-       stage('Push Image to Docker HUB') {
+        stage('Building Docker Image') {
             steps {
-                withCredentials([string(credentialsId: 'DOCKER_HUB_PWD', variable: 'DOCKER_HUB_PASS_CODE')]) {
+                sh 'sudo docker build -t mdhack/myocp:${BUILD_NUMBER} .'
+            }
+        }
+        stage('Pusing the Image Into Docker HUB') {
+            steps {
+                withCredentials([string(credentialsId: 'DOCKER_HUB_PASSWD', variable: 'DOCKERPASSWORD')]) {
     // some block
-    sh 'docker login -u mdhack -p $DOCKER_HUB_PASS_CODE'
+                 sh 'sudo docker login -u mdhack -p  $DOCKERPASSWORD'
+                 sh 'sudo docker push mdhack/myocp:${BUILD_NUMBER}'
 }
-                sh 'docker push mdhack/myjava:${BUILD_NUMBER}'
+               
             }
-       }
-       stage('Deploy in Dev Env') {
-           steps { 
-               sh 'docker rm -f test1'
-               sh 'docker run -itd -p 8084:8080 --name test1 mdhack/myjava:${BUILD_NUMBER} '
-           }
-       }
-       stage('Deploy App in QA/Test Env') {
-           steps {
-               sshagent(['QA_ENV_PASS']) {
-                   
-                sh "ssh -o StrictHostKeyChecking=no  ec2-user@54.191.167.253  sudo systemctl start docker ; sudo  docker  rm -f test1"
-                sh "ssh ec2-user@54.191.167.253  sudo  docker  rm -f test1"
-                sh "ssh ec2-user@54.191.167.253 sudo docker run -itd -p 8084:8080  --name test1  mdhack/myjava:${BUILD_NUMBER}"
+        }
+        stage('Test Dokcer Container IN DEV ENV ') {
+            steps {
+                sh 'sudo docker rm -f test'
+                sh 'sudo docker run -itd -p 8088:8080 --name test mdhack/myocp:${BUILD_NUMBER}'
+            }
+        }
+        stage('Testing In Test Env') {
+            steps {
+                sshagent(['TESTENV']) {
+    // some block
+                sh 'ssh -o StrictHostKeyChecking=no ec2-user@43.205.96.46  sudo docker rm -f  test1'
+                sh 'ssh ec2-user@43.205.96.46  sudo docker run -itd -p 4545:8080 --name test1 mdhack/myocp:${BUILD_NUMBER}'
 }
-           }
-       }
-       stage('Verifying The Code') {
-           steps {
-               retry(7) {
-                    sh 'curl --silent http://54.191.167.253:8084/java-web-app/ | grep -i sehwag'
-               }
-           }
-       }
-       stage('QA Team Test') {
-           steps {
-               input(message: "Release to Production? ")
-           }
-       }
-      
-       stage('Deploy App in PROD Env') {
-           steps {
-               sshagent(['QA_ENV_PASS']) {
-                   
-                sh "ssh -o StrictHostKeyChecking=no  ec2-user@35.90.247.185  sudo kubectl delete deployment mayank"
-                sh "ssh ec2-user@35.90.247.185  sudo kubectl delete svc my-service"
-                sh "ssh ec2-user@35.90.247.185  sudo rm -rf  webappsvc*"
-                sh "ssh ec2-user@35.90.247.185 sudo kubectl create deployment mayank --image  mdhack/myjava:${BUILD_NUMBER}"
-                sh "ssh ec2-user@35.90.247.185 sudo wget https://raw.githubusercontent.com/mdhack0316/jenkinsdockerapp/main/webappsvc.yml"
-                sh "ssh ec2-user@35.90.247.185 sudo kubectl create -f webappsvc.yml"
+            }
+        }
+        stage('Verifying Our Webssite in TEST ENV') {
+            steps {
+                retry(7)  {
+                    sh 'curl -s 43.205.96.46:4545/java-web-app/ | grep -i sehwag'
 }
-           }
-       }
-        
-        
-    }
-      post {
-         always {
-             echo "You can always see me"
-         }
-         success {
-              echo "I am running because the job ran successfully"
-         }
-         unstable {
-              echo "Gear up ! The build is unstable. Try fix it"
-         }
-         failure {
-             echo "OMG ! The build failed"
-             mail bcc: '', body: 'Ltest', cc: '', from: '', replyTo: '', subject: 'job ete fail', to: 'mayank123modi@gmail.com'
-         }
-     }
-
+            }
+        }
+        stage('Asking For Production Release?') {
+            steps {
+                input 'Release To Production? '
+            }
+        }
+        stage('Deploy in Production Env Grade Kubernetes Cluster') {
+            steps {
+                sshagent(['PRODENV']) {
+                sh 'ssh -o StrictHostKeyChecking=no  ubuntu@3.17.93.71 kubectl delete all --all'
+                sh 'ssh ubuntu@3.17.93.71 kubectl create deployment mayank --image mdhack/myocp:${BUILD_NUMBER}'
+                sh 'ssh ubuntu@3.17.93.71  wget https://raw.githubusercontent.com/mdhack0316/jenkinsdockerapp/main/webappsvc.yml '
+                sh 'ssh ubuntu@3.17.93.71 kubectl create -f webappsvc.yml'
 }
-
+            }
+        }
+    }  
+}
