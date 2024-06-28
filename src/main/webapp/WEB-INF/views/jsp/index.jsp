@@ -48,7 +48,7 @@
 
 	<hr>
 	<footer>
-		<p>&copy; Sehwag Cricketer</p>
+		<p>&copy; Sehwag Cricketer 2024</p>
 	</footer>
 </div>
 
