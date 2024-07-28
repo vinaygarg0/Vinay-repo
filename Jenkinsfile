@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Pulling The Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/vinaygarg0/jenkinsdockerapp'
+                git branch: 'main', url: 'https://github.com/vinaygarg0/jenkinsdockerapp', credentialsId: 'GIT_CREDENTIALS'
             }
         }
         stage('Build Jar File Using Maven Tool') {
@@ -36,11 +36,9 @@ pipeline {
         
         stage('Deploy in Production Env Grade Kubernetes Cluster') {
             steps {
-                sshagent(['PRODENV']) {
                 sh 'kubectl create deployment vinay --image vinay6may/vinayimg:${BUILD_NUMBER}'
                 sh 'wget https://raw.githubusercontent.com/vinaygarg0/jenkinsdockerapp/main/webappsvc.yml '
                 sh 'kubectl create -f webappsvc.yml'
-}
             }
         }
     }  
