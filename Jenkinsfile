@@ -39,9 +39,9 @@ pipeline {
                 sh 'kubectl create deployment vinay --image vinay6may/vinayimg:${BUILD_NUMBER}'
                 sh 'wget https://raw.githubusercontent.com/vinaygarg0/jenkinsdockerapp/main/webappsvc.yml '
                 sh 'kubectl create -f webappsvc.yml'
-                sh 'kubectl create deployment version1 --image httpd'
-                sh 'kubectl expose deployment version1 --port 80 --type NodePort'
-                sh 'kubectl create deployment version2 --image nginx'
+                sh 'kubectl create deployment v1 --image httpd'
+                sh 'kubectl expose deployment v1 --port 80 --type NodePort'
+                sh 'kubectl create deployment v2 --image nginx'
             }
         }
     }  
