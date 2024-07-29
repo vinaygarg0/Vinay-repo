@@ -57,7 +57,9 @@ pipeline {
                     sh '''
                     kubectl expose deployment ${DEPLOYMENT_NAME_GREEN} --port=${PORT} --target-port=${TARGET_PORT} --name=${SERVICE_NAME} --type=LoadBalancer || kubectl apply -f service-${SERVICE_NAME}.yml
                     '''
-                                        
+                    
+                    }
+                    
                     // Wait for the new deployment to become available
                     sh 'kubectl rollout status deployment/${DEPLOYMENT_NAME_GREEN}'
                     
