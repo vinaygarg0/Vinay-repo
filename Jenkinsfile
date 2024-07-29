@@ -58,7 +58,7 @@ pipeline {
                     kubectl expose deployment ${DEPLOYMENT_NAME_GREEN} --port=${PORT} --target-port=${TARGET_PORT} --name=${SERVICE_NAME} --type=LoadBalancer || kubectl apply -f service-${SERVICE_NAME}.yml
                     '''
                     script {
-                        timeout(time: 1, unit: 'MINUTES') {
+                        timeout(time: 5, unit: 'MINUTES') {
                             def loadBalancerIP = ''
                             while (loadBalancerIP == '') {
                                 loadBalancerIP = sh(script: "kubectl get svc vinay-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'", returnStdout: true).trim()
