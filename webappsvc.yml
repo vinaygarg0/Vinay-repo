@@ -7,7 +7,7 @@ metadata:
 spec:
   selector:
     app: vinay1
-  type: NodePort
+  type: Loadbalance
   ports:
     - nodePort: 30000
       port: 8080
