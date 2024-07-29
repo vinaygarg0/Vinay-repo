@@ -49,20 +49,7 @@ pipeline {
         stage('Deploy in Production Environment') {
             steps {
                 script {
-                    // Check if the blue deployment exists
-                    def blueExists = sh(script: 'kubectl get deployments ${DEPLOYMENT_NAME_BLUE} --ignore-not-found', returnStatus: true) == 0
-                    def greenExists = sh(script: 'kubectl get deployments ${DEPLOYMENT_NAME_GREEN} --ignore-not-found', returnStatus: true) == 0
-
-                    if (blueExists) {
-                        // Scale down the blue deployment
-                        sh "kubectl scale deployment ${DEPLOYMENT_NAME_BLUE} --replicas=0"
-                    }
-
-                    if (greenExists) {
-                        // Delete existing green deployment
-                        sh "kubectl delete deployment ${DEPLOYMENT_NAME_GREEN}"
-                    }
-
+                
                     // Create or update the green deployment
                     sh "kubectl create deployment ${DEPLOYMENT_NAME_GREEN} --image=${IMAGE_NAME}:${BUILD_NUMBER} || kubectl apply -f deployment-${DEPLOYMENT_NAME_GREEN}.yml"
 
