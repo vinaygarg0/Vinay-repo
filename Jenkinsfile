@@ -51,7 +51,7 @@ pipeline {
                 script {
                 
                     // Create or update the green deployment
-                    sh "kubectl create deployment ${DEPLOYMENT_NAME_GREEN} --image=${IMAGE_NAME}:${BUILD_NUMBER} || kubectl apply -f deployment-${DEPLOYMENT_NAME_GREEN}.yml"
+                    sh "kubectl create deployment ${DEPLOYMENT_NAME_GREEN} --image=${IMAGE_NAME}:${BUILD_NUMBER} "
 
                     // Update or create service to point to green deployment
                     sh '''
