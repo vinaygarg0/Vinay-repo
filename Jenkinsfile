@@ -93,4 +93,3 @@ pipeline {
             sh "kubectl rollout undo deployment/${DEPLOYMENT_NAME_GREEN}"
         }
     }
-}
